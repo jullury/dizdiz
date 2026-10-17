@@ -20,10 +20,17 @@ jobs:
 
       - name: Validate commit messages
         run: |
+          set -euo pipefail
           before="${{ github.event.before }}"
           # all-zeros = new branch or force push; that range is meaningless, so be broad
           if [ "$before" = "0000000000000000000000000000000000000000" ]; then
-            git log -50 --format=%s HEAD | bash tools/check-commit-msg.sh -
+            sha="${{ github.sha }}"
+            count=$(git rev-list --count "$sha")
+            if [ "$count" -gt 50 ]; then
+              echo "Initial push has $count commits; this exceeds the guard's validation cap (50). Please push in smaller batches or squash/rebase and re-push."
+              exit 1
+            fi
+            git log --format=%s "$sha" | bash tools/check-commit-msg.sh -
           else
             git log --format=%s "$before..${{ github.sha }}" | bash tools/check-commit-msg.sh -
           fi
