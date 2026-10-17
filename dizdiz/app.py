@@ -21,7 +21,11 @@ from .ui.settings_window import SettingsWindow
 class Application:
     def __init__(self) -> None:
         self.settings = Settings.load()
-        self.app = QApplication(sys.argv)
+        # PyQt6 returns a fresh Python wrapper for the same C++ QApplication on
+        # every construction, and each wrapper destroys it at shutdown; a second
+        # one therefore double-frees the object and segfaults the interpreter.
+        # Reuse the existing instance instead of building another wrapper.
+        self.app = QApplication.instance() or QApplication(sys.argv)
         self.app.setQuitOnLastWindowClosed(False)
         self.app.setApplicationName("Dizdiz")
 
