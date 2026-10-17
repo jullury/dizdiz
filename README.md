@@ -128,6 +128,20 @@ works too.
 pytest
 ```
 
+## Releases
+
+Versioning is automated from Conventional Commit messages
+(`feat` → minor, `fix`/`perf` → patch, `!`/`BREAKING CHANGE` → minor while the
+major version is `0`). Every push to `main` runs
+`.github/workflows/release.yml`, which bumps `pyproject.toml`, regenerates
+`CHANGELOG.md`, tags `vX.Y.Z`, and publishes a GitHub Release.
+
+Enable the local commit-message guard once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## Licence
 
 MIT — see [LICENSE](LICENSE).

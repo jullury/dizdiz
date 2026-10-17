@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        run: |
+          before="${{ github.event.before }}"
+          # all-zeros = new branch or force push; that range is meaningless, so be broad
+          if [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            git log -50 --format=%s HEAD | bash tools/check-commit-msg.sh -
+          else
+            git log --format=%s "$before..${{ github.sha }}" | bash tools/check-commit-msg.sh -
+          fi
+
+      - name: Python Semantic Release
+        uses: python-semantic-release/python-semantic-release@v10
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: github-actions
+          git_committer_email: actions@users.noreply.github.com
+          verbosity: 2

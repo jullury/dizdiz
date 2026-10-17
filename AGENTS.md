@@ -21,9 +21,13 @@ XDG dirs — always resolve paths through `dizdiz/paths.py`.
 
 ## Verification reality
 
-There is **no** linter, formatter, type checker, or CI here. `pytest` (currently 19
-tests) is the only automated check and must pass. Do not invent `ruff`/`mypy`/`make`
-steps from generic habits.
+There is **no** linter, formatter, or type checker here. `pytest` is the only local
+automated check and must pass. The only CI is `.github/workflows/release.yml`, and it
+does not run tests — on every push to `main` it validates commit subjects, then runs
+`python-semantic-release` to bump `pyproject.toml`, regenerate `CHANGELOG.md`, tag
+`vX.Y.Z`, and create a GitHub Release. Commit subjects must be Conventional Commits
+(hook: `git config core.hooksPath .githooks`); non-conforming messages fail both the
+hook and the workflow.
 
 ## Architecture notes agents get wrong
 
