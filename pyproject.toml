@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dizdiz"
+version = "0.1.0"
+description = "Linux keyboard sound player"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+  "PyQt6>=6.6",
+  "evdev>=1.7",
+]
+
+[project.scripts]
+dizdiz = "dizdiz.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dizdiz*"]
+
+[tool.setuptools.package-data]
+dizdiz = ["assets/sounds/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

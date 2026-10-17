@@ -1,0 +1,11 @@
+*.egg-info/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.playwright-mcp/
+.opencode/
+dist/
+build/
+docs/
+.specify/
