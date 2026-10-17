@@ -26,6 +26,7 @@ from ..settings import Settings
 from ..sound_catalog import SoundPack, all_packs
 from ..sound_engine import SoundEngine
 from ..sound_importer import import_sound, is_supported
+from ..update_check import current_version
 
 
 class SettingsWindow(QWidget):
@@ -134,11 +135,26 @@ class SettingsWindow(QWidget):
             "<h3>Dizdiz for Linux</h3>"
             "<p>Plays a short sound on key presses. Keystrokes are never recorded, "
             "buffered, or sent anywhere.</p>"
+            "<p>Once an hour Dizdiz asks GitHub whether a newer version exists. "
+            "That request contains nothing about you or your keystrokes, and "
+            "automatic checks can be turned off below.</p>"
             "<p>Inspired by ShotGun Keyboard by Adeel Ahsan.</p>"
             "<p>Credit: <a href='https://github.com/aeronautyy/shortgun-keyboard'>Original ShotGun Keyboard project</a> "
             "and <a href='https://aeronautyy.com'>aeronautyy.com</a>.</p>"
         )
         layout.addWidget(browser)
+
+        self.version_label = QLabel("")
+        layout.addWidget(self.version_label)
+
+        self.updates_check = QCheckBox("Check for updates hourly")
+        self.updates_check.setToolTip(
+            "Asks GitHub once an hour whether a newer release exists. No data about "
+            "you or your keystrokes is sent. The tray menu's \"Check for updates "
+            "now\" works either way, because you asked for it explicitly."
+        )
+        self.updates_check.toggled.connect(self._on_updates_changed)
+        layout.addWidget(self.updates_check)
         return widget
 
     def _refresh_packs(self) -> None:
@@ -184,6 +200,7 @@ class SettingsWindow(QWidget):
             self.repeat_check,
             self.modifiers_check,
             self.autostart_check,
+            self.updates_check,
         )
         for widget in widgets:
             widget.blockSignals(True)
@@ -195,9 +212,14 @@ class SettingsWindow(QWidget):
             self.repeat_check.setChecked(self.settings.play_on_key_repeat)
             self.modifiers_check.setChecked(self.settings.play_for_modifiers)
             self.autostart_check.setChecked(is_enabled())
+            self.updates_check.setChecked(self.settings.check_updates)
         finally:
             for widget in widgets:
                 widget.blockSignals(False)
+        version = current_version()
+        self.version_label.setText(
+            f"Version {version}" if version else "Version unknown (running from a source checkout)"
+        )
         self._sync_sound_combo_enabled()
         self._refresh_custom()
 
@@ -252,6 +274,10 @@ class SettingsWindow(QWidget):
 
     def _on_modifiers_changed(self, checked: bool) -> None:
         self.settings.play_for_modifiers = checked
+        self._save()
+
+    def _on_updates_changed(self, checked: bool) -> None:
+        self.settings.check_updates = checked
         self._save()
 
     def _save(self) -> None:

@@ -43,6 +43,8 @@ class Settings:
     play_on_key_repeat: bool = False
     play_for_modifiers: bool = False
     has_launched_before: bool = False
+    check_updates: bool = True
+    last_notified_version: str | None = None
     custom_sounds: list[dict[str, Any]] = field(default_factory=list)
 
     @classmethod

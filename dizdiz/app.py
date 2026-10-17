@@ -1,9 +1,10 @@
 import signal
 import sys
+import threading
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+from PyQt6.QtCore import QObject, Qt, QTimer, QUrl, pyqtSignal
+from PyQt6.QtGui import QColor, QDesktopServices, QFont, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import QApplication, QMenu, QMessageBox, QSystemTrayIcon
 
 from .autostart import is_enabled
@@ -16,6 +17,25 @@ from .single_instance import SingleInstance
 from .sound_catalog import find_sound
 from .sound_engine import SoundEngine
 from .ui.settings_window import SettingsWindow
+from .update_check import (
+    RELEASES_PAGE_URL,
+    current_version,
+    fetch_latest_version,
+    is_newer,
+    should_notify,
+)
+
+UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000
+UPDATE_CHECK_FIRST_DELAY_MS = 2 * 60 * 1000
+UPDATE_NOTIFICATION_MS = 15 * 1000
+
+
+class UpdateSignals(QObject):
+    """Carries a worker thread's result back onto the Qt event loop."""
+
+    # Latest release tag ("" when GitHub was unreachable) and whether a user
+    # asked for the check.
+    checked = pyqtSignal(str, bool)
 
 
 class Application:
@@ -33,8 +53,15 @@ class Application:
         self.engine.preload()
         self.hook = KeyboardHook(self.settings, self._on_key_press)
 
+        self._update_check_running = False
+        self._update_check_timer: QTimer | None = None
         self.settings_window: SettingsWindow | None = None
         self.tray = self._create_tray()
+
+        self.update_signals = UpdateSignals()
+        self.update_signals.checked.connect(self._on_update_checked)
+        self.tray.messageClicked.connect(self._open_releases_page)
+        self._start_update_checks()
 
         if self.settings.sounds_enabled:
             self.hook.start()
@@ -75,6 +102,14 @@ class Application:
         folder_action.triggered.connect(self._open_sounds_folder)
 
         menu.addSeparator()
+        self.check_now_action = menu.addAction("Check for updates now")
+        self.check_now_action.triggered.connect(lambda: self._check_for_update(manual=True))
+
+        self.update_available_action = menu.addAction("Update available")
+        self.update_available_action.triggered.connect(self._open_releases_page)
+        self.update_available_action.setVisible(False)
+
+        menu.addSeparator()
         quit_action = menu.addAction("Quit")
         quit_action.triggered.connect(self._quit)
 
@@ -102,10 +137,94 @@ class Application:
         except OSError:
             pass
 
+    def _start_update_checks(self) -> None:
+        timer = QTimer(self.app)
+        timer.setInterval(UPDATE_CHECK_INTERVAL_MS)
+        timer.timeout.connect(self._check_for_update)
+        timer.start()
+        self._update_check_timer = timer
+        QTimer.singleShot(UPDATE_CHECK_FIRST_DELAY_MS, self._check_for_update)
+
+    def _check_for_update(self, manual: bool = False) -> None:
+        """Kick off one non-blocking check. Returns at once; the fetch is elsewhere.
+
+        ``manual`` is a tray-menu click: it bypasses the automatic-check opt-out,
+        because the click itself is the request.
+        """
+        if not manual and not self.settings.check_updates:
+            return
+        if self._update_check_running:
+            return
+        self._update_check_running = True
+        threading.Thread(target=self._fetch_update, args=(manual,), daemon=True).start()
+
+    def _fetch_update(self, manual: bool = False) -> None:
+        """Worker thread body: fetch and hand the result to the Qt thread."""
+        try:
+            self.update_signals.checked.emit(fetch_latest_version() or "", manual)
+        finally:
+            self._update_check_running = False
+
+    def _on_update_checked(self, latest: str, manual: bool) -> None:
+        """Qt thread: decide what, if anything, the user should hear."""
+        current = current_version()
+        if current is None:
+            if manual:
+                self._notify(
+                    "Update check",
+                    "The installed Dizdiz version could not be determined, "
+                    "so it cannot be compared to the latest release.",
+                )
+            return
+
+        if not latest:
+            if manual:
+                self._notify(
+                    "Update check failed",
+                    "GitHub could not be reached. Check your connection and try again.",
+                )
+            return
+
+        if not is_newer(latest, current):
+            if manual:
+                self._notify(
+                    "Dizdiz is up to date",
+                    f"You have the latest version ({current}).",
+                )
+            return
+
+        self.update_available_action.setText(f"Update available: {latest} (release page)")
+        self.update_available_action.setVisible(True)
+
+        # Automatic checks stay quiet about a release they already announced;
+        # a manual check always reports what it found.
+        if not manual and not should_notify(latest, current, self.settings.last_notified_version):
+            return
+
+        self.settings.last_notified_version = latest
+        try:
+            self.settings.save()
+        except OSError:
+            pass
+        self._notify(
+            "Dizdiz update available",
+            f"Dizdiz {latest} is available (you have {current})."
+            "\nClick here to open the release page.",
+        )
+
+    def _notify(self, title: str, body: str) -> None:
+        self.tray.showMessage(
+            title,
+            body,
+            QSystemTrayIcon.MessageIcon.Information,
+            UPDATE_NOTIFICATION_MS,
+        )
+
+    def _open_releases_page(self) -> None:
+        QDesktopServices.openUrl(QUrl(RELEASES_PAGE_URL))
+
     def _open_sounds_folder(self) -> None:
         custom_sounds_dir().mkdir(parents=True, exist_ok=True)
-        from PyQt6.QtCore import QUrl
-        from PyQt6.QtGui import QDesktopServices
 
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(custom_sounds_dir())))
 

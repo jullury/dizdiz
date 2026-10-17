@@ -51,6 +51,16 @@ def test_opening_settings_writes_nothing_to_disk(window):
     assert settings_path().exists() is False
 
 
+def test_opening_settings_reflects_update_check_preference(window):
+    _, build = window
+
+    _, enabled_window = build(check_updates=True)
+    _, disabled_window = build(check_updates=False)
+
+    assert enabled_window.updates_check.isChecked() is True
+    assert disabled_window.updates_check.isChecked() is False
+
+
 def test_refresh_does_not_mutate_settings(window):
     _, build = window
     settings, settings_window = build(sounds_enabled=True, random_mode=True)
@@ -74,6 +84,33 @@ def test_toggling_one_control_persists_only_that_field(window):
     assert loaded.play_on_key_repeat is False
     assert loaded.play_for_modifiers is False
     assert loaded.volume == settings.volume
+
+
+def test_toggling_update_check_persists_only_that_field(window):
+    _, build = window
+    _, settings_window = build()
+
+    settings_window.updates_check.setChecked(False)
+
+    loaded = Settings.load()
+    assert loaded.check_updates is False
+    assert loaded.sounds_enabled is True
+    assert loaded.random_mode is True
+
+
+def test_about_tab_shows_the_running_version(window, monkeypatch):
+    _, build = window
+    _, settings_window = build()
+
+    monkeypatch.setattr(
+        "dizdiz.ui.settings_window.current_version", lambda: "0.4.2"
+    )
+    settings_window._load_values()
+    assert "0.4.2" in settings_window.version_label.text()
+
+    monkeypatch.setattr("dizdiz.ui.settings_window.current_version", lambda: None)
+    settings_window._load_values()
+    assert "unknown" in settings_window.version_label.text().lower()
 
 
 def test_random_mode_locks_sound_selector(window):

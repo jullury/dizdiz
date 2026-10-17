@@ -10,6 +10,8 @@ def test_defaults():
     assert s.sounds_enabled is True
     assert s.selected_pack_id == "shotgun"
     assert s.volume == 0.7
+    assert s.check_updates is True
+    assert s.last_notified_version is None
 
 
 def test_round_trip(tmp_path, monkeypatch):
