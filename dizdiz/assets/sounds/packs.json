@@ -1,0 +1,243 @@
+{
+  "packs": [
+    {
+      "id": "arcade",
+      "name": "Arcade",
+      "sounds": [
+        {
+          "id": "arcade.beep_01a",
+          "name": "Beep 1",
+          "file": "arcade/beep_01a.wav"
+        },
+        {
+          "id": "arcade.beep_02",
+          "name": "Beep 2",
+          "file": "arcade/beep_02.wav"
+        },
+        {
+          "id": "arcade.beep_03",
+          "name": "Beep 3",
+          "file": "arcade/beep_03.wav"
+        },
+        {
+          "id": "arcade.beep_04",
+          "name": "Beep 4",
+          "file": "arcade/beep_04.wav"
+        }
+      ]
+    },
+    {
+      "id": "bubble",
+      "name": "Bubble",
+      "sounds": [
+        {
+          "id": "bubble.pop1",
+          "name": "Pop1",
+          "file": "bubble/pop1.wav"
+        },
+        {
+          "id": "bubble.pop2",
+          "name": "Pop2",
+          "file": "bubble/pop2.wav"
+        },
+        {
+          "id": "bubble.pop3",
+          "name": "Pop3",
+          "file": "bubble/pop3.wav"
+        }
+      ]
+    },
+    {
+      "id": "click",
+      "name": "Click",
+      "sounds": [
+        {
+          "id": "click.button_1",
+          "name": "Button 1",
+          "file": "click/button_1.wav"
+        },
+        {
+          "id": "click.button_2",
+          "name": "Button 2",
+          "file": "click/button_2.wav"
+        },
+        {
+          "id": "click.button_3",
+          "name": "Button 3",
+          "file": "click/button_3.wav"
+        },
+        {
+          "id": "click.button_4",
+          "name": "Button 4",
+          "file": "click/button_4.wav"
+        }
+      ]
+    },
+    {
+      "id": "drum",
+      "name": "Drum",
+      "sounds": [
+        {
+          "id": "drum.kick",
+          "name": "Kick",
+          "file": "drum/kick.wav"
+        },
+        {
+          "id": "drum.snare",
+          "name": "Snare",
+          "file": "drum/snare.wav"
+        },
+        {
+          "id": "drum.hihat",
+          "name": "Hihat",
+          "file": "drum/hihat.wav"
+        },
+        {
+          "id": "drum.tom",
+          "name": "Tom",
+          "file": "drum/tom.wav"
+        }
+      ]
+    },
+    {
+      "id": "laser",
+      "name": "Laser",
+      "sounds": [
+        {
+          "id": "laser.zap1",
+          "name": "Zap1",
+          "file": "laser/zap1.wav"
+        },
+        {
+          "id": "laser.zap2",
+          "name": "Zap2",
+          "file": "laser/zap2.wav"
+        },
+        {
+          "id": "laser.zap3",
+          "name": "Zap3",
+          "file": "laser/zap3.wav"
+        }
+      ]
+    },
+    {
+      "id": "mechanical",
+      "name": "Mechanical",
+      "sounds": [
+        {
+          "id": "mechanical.multi_plier_close",
+          "name": "Multi-Plier Close",
+          "file": "mechanical/multi_plier_close.wav"
+        },
+        {
+          "id": "mechanical.multi_plier_open",
+          "name": "Multi-Plier Open",
+          "file": "mechanical/multi_plier_open.wav"
+        },
+        {
+          "id": "mechanical.sharpening_knife",
+          "name": "Sharpening Knife",
+          "file": "mechanical/sharpening_knife.wav"
+        }
+      ]
+    },
+    {
+      "id": "scifi",
+      "name": "Scifi",
+      "sounds": [
+        {
+          "id": "scifi.scan",
+          "name": "Scan",
+          "file": "scifi/scan.wav"
+        },
+        {
+          "id": "scifi.warp",
+          "name": "Warp",
+          "file": "scifi/warp.wav"
+        },
+        {
+          "id": "scifi.alert",
+          "name": "Alert",
+          "file": "scifi/alert.wav"
+        }
+      ]
+    },
+    {
+      "id": "shotgun",
+      "name": "Shotgun",
+      "sounds": [
+        {
+          "id": "shotgun.pd_gunshot_01",
+          "name": "Gunshot 1",
+          "file": "shotgun/pd_gunshot_01.wav"
+        },
+        {
+          "id": "shotgun.pd_gunshot_02",
+          "name": "Gunshot 2",
+          "file": "shotgun/pd_gunshot_02.wav"
+        },
+        {
+          "id": "shotgun.pd_gunshot_03",
+          "name": "Gunshot 3",
+          "file": "shotgun/pd_gunshot_03.wav"
+        },
+        {
+          "id": "shotgun.pd_gunshot_04",
+          "name": "Gunshot 4",
+          "file": "shotgun/pd_gunshot_04.wav"
+        },
+        {
+          "id": "shotgun.pd_gunshot_05",
+          "name": "Gunshot 5",
+          "file": "shotgun/pd_gunshot_05.wav"
+        },
+        {
+          "id": "shotgun.pd_gunshot_06",
+          "name": "Gunshot 6",
+          "file": "shotgun/pd_gunshot_06.wav"
+        },
+        {
+          "id": "shotgun.pd_gunshot_07",
+          "name": "Gunshot 7",
+          "file": "shotgun/pd_gunshot_07.wav"
+        },
+        {
+          "id": "shotgun.pd_gunshot_08",
+          "name": "Gunshot 8",
+          "file": "shotgun/pd_gunshot_08.wav"
+        },
+        {
+          "id": "shotgun.machine_gun_burst",
+          "name": "Machine Gun Burst",
+          "file": "shotgun/cc0_machine_gun_burst.wav"
+        },
+        {
+          "id": "shotgun.reload",
+          "name": "Reload",
+          "file": "shotgun/reload.wav"
+        }
+      ]
+    },
+    {
+      "id": "typewriter",
+      "name": "Typewriter",
+      "sounds": [
+        {
+          "id": "typewriter.key1",
+          "name": "Key1",
+          "file": "typewriter/key1.wav"
+        },
+        {
+          "id": "typewriter.key2",
+          "name": "Key2",
+          "file": "typewriter/key2.wav"
+        },
+        {
+          "id": "typewriter.key3",
+          "name": "Key3",
+          "file": "typewriter/key3.wav"
+        }
+      ]
+    }
+  ]
+}
