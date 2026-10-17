@@ -27,3 +27,10 @@ dizdiz = ["assets/sounds/**/*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+major_on_zero = false
+
+[tool.semantic_release.publish]
+upload_to_vcs_release = true
