@@ -1,3 +1,4 @@
+import signal
 import sys
 from pathlib import Path
 
@@ -141,7 +142,17 @@ class Application:
         return self.app.exec()
 
 
-def main() -> None:
+def main() -> int:
+    # Ctrl-C in the launching terminal must quit. CPython replaces SIGINT's
+    # default disposition with a handler that only sets a flag, and the flag is
+    # acted on at the next Python bytecode boundary -- which never comes while
+    # Qt's event loop is blocked in C++, so the app ignores Ctrl-C. Restoring
+    # the kernel default makes SIGINT terminate the process immediately, in
+    # every path including nested modal loops. Nothing is lost by skipping the
+    # graceful path: SoundEngine.shutdown() is a no-op, the keyboard thread is a
+    # daemon, and the kernel closes its fds and releases the flock on exit.
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     single = SingleInstance()
     if not single.acquire():
         app = QApplication(sys.argv)

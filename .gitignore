@@ -9,3 +9,4 @@ dist/
 build/
 docs/
 .specify/
+graphify-out/
