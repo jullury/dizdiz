@@ -133,9 +133,12 @@ dependency, never required locally.
   time** (it will have moved past the SHA in this doc) and push it, so the first
   CI run has a "last release" anchor instead of jumping to `1.0.0`.
   Touches remote state → executed only with explicit user go-ahead.
-- Pre-check repo settings with `gh`: if `main` has branch protection that
-  blocks `GITHUB_TOKEN` pushes or requires signed commits, the bot push fails.
-  Flag to the user before anything else if so.
+- Pre-check repo settings: **verified 2026-10-17** via `gh api
+  repos/jullury/dizdiz/branches/main/protection` → `404 Branch not protected`.
+  No protection rules, so the `GITHUB_TOKEN` push (commit + tag + release) is
+  not blocked and no signed-commit requirement exists. If protection is added
+  later, the bot push would start failing and this design must be revisited
+  (e.g. a PAT or GitHub App token, or a PR-based model).
 
 ### 6. Documentation
 
@@ -173,5 +176,6 @@ No app code changes; `tests/` and `pytest` are unaffected.
 
 ## Open items
 
-- Confirm `main` branch protection status via `gh` before implementation lands
-  (§5). Pin exact action SHAs at implementation time.
+- ~~Confirm `main` branch protection status via `gh`~~ — verified: `main` is
+  unprotected (see §5).
+- Pin exact action commit SHAs at implementation time.
