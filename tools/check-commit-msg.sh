@@ -19,6 +19,12 @@ subjects() {
   fi
 }
 
+# Fail closed: a path argument that cannot be read is an input error, not a pass.
+if [ "$#" -gt 0 ] && [ "$1" != "-" ] && [ ! -r "$1" ]; then
+  printf 'invalid commit message: cannot read %s\n' "$1" >&2
+  exit 1
+fi
+
 status=0
 while IFS= read -r line || [ -n "$line" ]; do
   [ -z "$line" ] && continue
