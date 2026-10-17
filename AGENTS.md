@@ -15,6 +15,7 @@ XDG dirs — always resolve paths through `dizdiz/paths.py`.
 
 - Run uninstalled: `python -m dizdiz` (or `pip install .` → `dizdiz` command)
 - Tests: `pytest` (config in `pyproject.toml`: `testpaths=["tests"]`, `pythonpath=["."]`)
+- Enable the commit-message guard (once per clone): `git config core.hooksPath .githooks`
 - One test: `pytest tests/test_settings.py::test_defaults`
 - Regenerate generated sounds: `python tools/make_sounds.py [laser|scifi|mechanical]`
 

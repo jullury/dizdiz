@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Git commit-msg hook: reject subjects that are not Conventional Commits.
+# Enable per clone with: git config core.hooksPath .githooks
+set -euo pipefail
+root="$(git rev-parse --show-toplevel)"
+exec "$root/tools/check-commit-msg.sh" "$1"
