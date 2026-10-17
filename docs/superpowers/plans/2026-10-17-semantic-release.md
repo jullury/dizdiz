@@ -17,7 +17,7 @@
 - PSR is installed **in CI only** (bundled by the action). Never add it to `[project] dependencies` or dev extras.
 - Conventional Commit type allowlist, verbatim: `feat fix perf refactor docs test build ci chore revert`.
 - Validator regex, verbatim: `^(feat|fix|perf|refactor|docs|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?!?: .+`
-- PSR config, verbatim: `version_toml = ["pyproject.toml:project.version"]`, `major_on_zero = false`, `[tool.semantic_release.publish] upload_to_vcs_release = true`.
+- PSR config, verbatim: `version_toml = ["pyproject.toml:project.version"]`, `major_on_zero = false`, `allow_zero_version = true`, `[tool.semantic_release.publish] upload_to_vcs_release = true`.
 - Version source of truth is `pyproject.toml` only (no `__version__` anywhere in `dizdiz/`).
 - Actions pinned: `actions/checkout@v7` (latest `v7.0.1`, sha `3d3c42e5aac5ba805825da76410c181273ba90b1`), `python-semantic-release/python-semantic-release@v10` (latest `v10.7.0`).
 - `docs/` is in `.gitignore`; new files under `docs/` must be added with `git add -f` (existing precedent).
@@ -284,6 +284,7 @@ Append to the end of `pyproject.toml`:
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
 major_on_zero = false
+allow_zero_version = true
 
 [tool.semantic_release.publish]
 upload_to_vcs_release = true
@@ -298,7 +299,17 @@ cd /home/jullury/Projects/Jullury/dizdiz
 /home/jullury/tmp/opencode/psr-verify/bin/semantic-release -vv --noop version --print
 ```
 
-Expected: exit `0` and a single version line. This repo currently has **no tags**, and PSR v10's `allow_zero_version = false` default means that line is `1.0.0` — which is exactly why Task 5 seeds `v0.1.0` before the workflow can ever run. A non-zero exit means the config or the install is wrong: stop and fix before continuing.
+Expected: exit `0` and a single version line. PSR v10 refuses to compute a version on a branch outside its release groups, so on a feature branch the command can exit `0` printing nothing — verify the number in an isolated clone of `main` carrying the same committed config.
+
+The decisive check is the 0.x bump table, in a scratch `main` repo whose `pyproject.toml` is this one and which has an annotated `v0.1.0` tag on an earlier commit:
+
+| Commits since `v0.1.0` | Expected |
+|---|---|
+| one `feat:` | `0.2.0` |
+| one `fix:` | `0.1.1` |
+| one `feat!:` / breaking | `0.2.0` (minor, not `1.0.0`) |
+
+With `allow_zero_version` left at its `false` default, every one of these prints `1.0.0` — that is the trap this key exists to avoid, and `major_on_zero` is inert without it. Record the actual printed values in the task report.
 
 Verify noop left nothing behind: `git status --porcelain` → expect empty.
 
@@ -447,7 +458,7 @@ git commit -m "feat(release): automate releases on push to main"
 - Consumes: everything from Tasks 1–4.
 - Produces: tag `v0.1.0` on the pre-tooling `main` HEAD; the first automated release (`v0.2.0`) from the conventional squash-merge commit.
 
-Ordering matters: the `v0.1.0` anchor **must** exist before the workflow ever runs, otherwise the first run has no previous version and `allow_zero_version = false` makes it release `1.0.0`.
+Ordering matters: the `v0.1.0` anchor **must** exist before the workflow ever runs. Without it the first run has no previous version to bump, so the pre-tooling history is unreleased and the first automated release is computed from scratch; the anchor is what makes the merge commit a *minor bump from 0.1.0* (`0.2.0`) rather than an initial release.
 
 - [ ] **Step 1: Confirm with the user before touching the remote**
 
@@ -505,7 +516,7 @@ git log --oneline -3    # expect chore(release): 0.2.0 and the squash-merged fea
 
 ## Self-Review
 
-**Spec coverage:** workflow (§1 → Task 4); checker + two call sites (§2 → Tasks 1, 4); local hook + activation (§3 → Task 2); PSR config incl. `major_on_zero = false` (§4 → Task 3); bootstrap anchor tag + unprotected-branch check (§5 → Task 5, protection verified up front); AGENTS.md + README (§6 → Tasks 2, 4); bootstrap tag, verification plan, open items (§Verification → Tasks 3, 4, 5).
+**Spec coverage:** workflow (§1 → Task 4); checker + two call sites (§2 → Tasks 1, 4); local hook + activation (§3 → Task 2); PSR config incl. `major_on_zero = false` and `allow_zero_version = true` (§4 → Task 3); bootstrap anchor tag + unprotected-branch check (§5 → Task 5, protection verified up front); AGENTS.md + README (§6 → Tasks 2, 4); bootstrap tag, verification plan, open items (§Verification → Tasks 3, 4, 5).
 
 **Placeholder scan:** no TBD/TODO; every file's full content is inline; every expected result is stated.
 

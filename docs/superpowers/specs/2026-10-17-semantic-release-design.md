@@ -19,7 +19,7 @@ Commits.
 | Release output | Version bump + `CHANGELOG.md` + tag + GitHub Release notes | No wheel artifacts, no PyPI publishing (YAGNI; can be added later). |
 | Bad commit messages | Fail the workflow **and** block locally via pre-commit guard | Silent skips hide drift; semver stays honest. |
 | Guard mechanism | Plain versioned git hooks (`.githooks/` + `core.hooksPath`) | Zero dependencies; `pre-commit` framework or `commitizen` would add weight for a single regex. |
-| 0.x breaking changes | Bump **minor**, not major | PSR v10 defaults `major_on_zero = true` (0.x breaking → 1.0.0); we set `major_on_zero = false` explicitly to keep 0.x semantics. |
+| 0.x breaking changes | Bump **minor**, not major | PSR v10 defaults `major_on_zero = true` (0.x breaking → 1.0.0); we set `major_on_zero = false` explicitly to keep 0.x semantics. This only takes effect alongside `allow_zero_version = true`: with the `false` default, PSR forces `MAJOR` for *any* bump while the latest version is 0.x and ignores `major_on_zero` entirely (verified empirically against v10.7.0: tag `v0.1.0` + one `feat` → `1.0.0`; the same history with `allow_zero_version = true` → `0.2.0`). |
 
 ## Non-goals
 
@@ -32,7 +32,7 @@ Commits.
 - `main` commits already follow Conventional Commits (`feat(app):`, `fix(app):`, `test:`, `chore(tools):`, `docs:`).
 - Version exists only in `pyproject.toml` (`version = "0.1.0"`); no `__version__` in code.
 - No git tags, no `CHANGELOG`, no `.github/workflows/`.
-- PSR v10.7.0 is current; with no anchor tag its `allow_zero_version = false` default would make the first release `1.0.0`.
+- PSR v10.7.0 is current; with no anchor tag its `allow_zero_version = false` default would make the first release `1.0.0`, so the config sets `allow_zero_version = true` explicitly (see §4). That key is also what makes `major_on_zero = false` effective at all.
 
 ## Design
 
@@ -115,7 +115,8 @@ git config core.hooksPath .githooks
 ```toml
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-major_on_zero = false        # 0.x breaking changes bump minor, not to 1.0.0
+major_on_zero = false         # 0.x breaking changes bump minor, not to 1.0.0
+allow_zero_version = true     # without this, PSR forces 1.0.0 from any 0.x version and ignores major_on_zero
 
 [tool.semantic_release.publish]
 upload_to_vcs_release = true  # create the GitHub Release with the notes
